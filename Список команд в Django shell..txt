@@ -1,0 +1,87 @@
+Список всех команд, запускаемых в Django shell.
+
+from django.contrib.auth.models import User
+from news.models import *
+
+1. Создать двух пользователей (с помощью метода User.objects.create_user('username')).
+
+user_1 = User.objects.create_user('Alex2022')
+user_2 = User.objects.create_user('Litrias93')
+
+2. Создать два объекта модели Author, связанные с пользователями.
+
+author_1 = Author.objects.create(user=user_1)
+author_2 = Author.objects.create(user=user_2)
+
+3. Добавить 4 категории в модель Category.
+
+category_1 = Category.objects.create(name_of_category='Бизнес')
+category_2 = Category.objects.create(name_of_category='Наука и технологии')
+category_3 = Category.objects.create(name_of_category='Юмор')
+category_4 = Category.objects.create(name_of_category='Политика')
+
+4. Добавить 2 статьи и 1 новость.
+
+post_1 = Post.objects.create(
+	author=author_1, 
+	post_type='AR', 
+	title='Какие приложения сильнее всего разряжают батарею и что с этим можно сделать', 
+	text='Специалисты компании Artezio специально для «Газеты.Ru» провели исследование, в результате которого выявили 20 самых энергозатратных мобильных приложений на Android и iOS.'
+)
+
+post_2 = Post.objects.create(
+	author=author_2, 
+	post_type='AR', 
+	title='Загробная угроза: почему мумии могут быть опасны для современного человека', 
+	text='Ученые из Национального института антропологии и истории Мексики сообщают, что мумии, выставленные в одном из музеев Мехико, могут представлять опасность для человека: на них обнаружен опасный грибок.'
+)
+
+news_1 = Post.objects.create(
+	author=author_1, 
+	post_type ='NW', 
+	title='Российские шахтеры устроили забастовку после сообщения о массовых увольнениях', 
+	text='В России решили закрыть единственное в стране месторождение изумрудов — «Мариинский прииск» на Урале. Шахтеров предупредили о грядущих массовых сокращениях, после чего работники устроили забастовку'
+)
+
+5. Присвоить им категории (как минимум в одной статье/новости должно быть не меньше 2 категорий).
+
+post_1.categories.add(category_1, category_2)
+post_1.save()
+post_2.categories.add(category_2, category_3)
+post_2.save()
+news_1.categories.add(category_1, category_4)
+news_1.save()
+
+6. Создать как минимум 4 комментария к разным объектам модели Post (в каждом объекте должен быть как минимум один комментарий).
+
+comment_1 = Comment.objects.create(post=post_1, user=user_2, comment_text='Полезная статья.')
+comment_2 = Comment.objects.create(post=post_2, user=user_1, comment_text='Страшно представить, какая зараза может быть в найденных гробницах!')
+comment_3 = Comment.objects.create(post=news_1, user=user_1, comment_text='Вот откуда отток изумрудов на запад шел!')
+comment_4 = Comment.objects.create(post=news_1, user=user_2, comment_text='Стране не нужны изумруды?')
+
+7. Применяя функции like() и dislike() к статьям/новостям и комментариям, скорректировать рейтинги этих объектов.
+
+post_1.like()
+post_2.dislike()
+post_2.like()
+news_1.dislike()
+comment_1.like()
+comment_2.dislike()
+comment_3.like()
+comment_4.like()
+
+8. Обновить рейтинги пользователей.
+author_1.update_rating()
+author_2.update_rating()
+
+
+9. Вывести username и рейтинг лучшего пользователя (применяя сортировку и возвращая поля первого объекта).
+best_user = Author.objects.order_by('-user_rating').values('user__username', 'user_rating').first()
+
+10. Вывести дату добавления, username автора, рейтинг, заголовок и превью лучшей статьи, основываясь на лайках/дислайках к этой статье.
+best_post = Post.objects.order_by('-post_rating').values('time_of_creation', 'author__user__username', 'post_rating', 'title').first()
+best_post_for_review = Post.objects.order_by('-post_rating').first()
+best_post_for_review.preview()
+
+11. Вывести все комментарии (дата, пользователь, рейтинг, текст) к этой статье.
+comments = Comment.objects.filter(post=best_post_for_review).values('comment_creation_time', 'user__username', 'comment_rating', 'comment_text')

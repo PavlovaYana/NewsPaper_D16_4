@@ -1,0 +1,45 @@
+{% extends 'flatpages/default.html' %}
+{% load custom_filters %}
+{% load custom_tags %}
+{% block title %}
+Categories
+{% endblock title %}
+
+{% block content %}
+   {% if is_not_subscriber %}
+        <p class="text-center"><a href="{%url 'subscribe' category.id %}" class="button">Подписаться</a></p>
+   {% endif %}
+   <h1>Все по категориям</h1>
+   {% if is_not_authors %}
+   <button> <a href="http://127.0.0.1:8000/sign/upgrade/"> Cтать автором!</a> </button>
+   {% endif %}
+   <h3> {{ new_post|default_if_none:"Мы сообщим о новых новостях!" }} </h3>
+   <hr>
+   {% if category_news_list %}
+       <table>
+           <tr>
+               <td>Тип</td>
+               <td>Заголовок</td>
+               <td>Дата публикации</td>
+               <td>Категория</td>
+               <td>Текст</td>
+           </tr>
+           {% for post in category_news_list %}
+           <tr>
+               <td>{{ post.get_post_type_display }}</td>
+               <td>{{ post.title|censor }}</td>
+               <td>{{ post.time_of_creation|date:'d M Y' }}</td>
+               <td>{% for category in post.categories.all %}
+                   <a href="{% url 'category_list' category.id %}">{{category.name_of_category}}</a>
+               {% endfor %}</td>
+               <td>{{ post.text|censor| truncatechars:20}}</td>
+           </tr>
+           {% endfor %}
+
+       </table>
+    </hr>
+   {% else %}
+       <h2>Новостей нет!</h2>
+
+   {% endif %}
+{% endblock content %}

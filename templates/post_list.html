@@ -1,0 +1,70 @@
+{% extends 'flatpages/default.html' %}
+
+{% load custom_filters %}
+
+{% block title %}
+Post
+{% endblock title %}
+
+{% load cache %}
+    {% cache 30 title %}
+{% endcache %}
+    {% cache 30 text %}
+{% endcache %}
+    {% cache 30 time_of_creation %}
+{% endcache %}
+
+{% block content %}
+    <h1>Все новости</h1>
+    <h3>{{ time_now|date:'d M Y' }}</h3>
+    <h3> Количество всех новостей - {{ post_list|length }}</h3>
+
+    <hr>
+    {% if post_list %}
+        <table>
+            <tr>
+                <td>Заголовок</td>
+                <td>Дата публикации</td>
+                <td>Текст</td>
+            </tr>
+
+            {% for post_detail in post_list %}
+            <tr>
+                <td>{{ post_detail.title|censor }}</td>
+                <td>{{ post_detail.time_of_creation|date:'d M Y' }}</td>
+                <td>{{ post_detail.text|truncatechars:20|censor }}</td>
+            </tr>
+            {% endfor %}
+
+        </table>
+    {% else %}
+        <h2>Новостей нет!</h2>
+    {% endif %}
+    {# Добавляем пагинацию на страницу #}
+
+    {# Информация о предыдущих страницах #}
+    {% if page_obj.has_previous %}
+       <a href="?page=1">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+
+   {# Информация о текущей странице #}
+   {{ page_obj.number }}
+
+   {# Информация о следующих страницах #}
+   {% if page_obj.has_next %}
+       <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+{% endblock content %}
+
+<!--Выводит новости в следующем виде — заголовок, дата публикации (день.месяц.год),
+затем первые 20 слов текста статьи. Можно вывести как списком, так и таблицей.
+Новости выводит в порядке от более свежей к старой.-->
+
